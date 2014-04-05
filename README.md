@@ -8,3 +8,10 @@ This will not disable Steam client updates. It only changes each game's auto upd
 
 Instructions For use:
 Just drop a steam library onto the script "disable.cmd" or if you have file extensions hidden, "disable". The steam library would be the folder which contains both steamapps and userdata folders.
+
+It will create backups of the files it makes changes to. The backups will go in an "acf-backups" folder in the library you dropped on the script.
+
+
+KNOWN ISSUES:
+
+- If a game is set to "High Priority - Always update this game ASAP" in Steam, it's update setting will not be changed. This is both a security feature in case you really must update those games and an oversight. ;p
