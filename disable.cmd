@@ -31,7 +31,6 @@ popd
 del /q "%tempdir%">nul
 rmdir "%tempdir%">nul
 
-pause
 goto :EOF
 
 
