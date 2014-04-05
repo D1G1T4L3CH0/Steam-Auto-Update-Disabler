@@ -1,23 +1,10 @@
 @echo off
-:: "AutoUpdateBehavior" "0"
-:: D:\Libs\Steam\steamapps
-
-:: Directory containing acf files must be specified.
-:: Backup all acf files.
-:: Change AutoUpdateBehavior to 1 in all acf files.
 :: Steam should NOT be running while the changes are applied. If so, the changes are just reverted upon restarting steam.
 
 setlocal ENABLEDELAYEDEXPANSION
 
 :: check if steam is running. inform user to close first. then exit.
-for /f "usebackq tokens=1" %%x in (`tasklist /fi "imagename eq steam.exe" /nh`) do (
-	if /i "%%x" == "Steam.exe" (
-		echo Steam appears to be running. Please close steam first. Press any key to close this window...
-		pause>nul
-		goto :EOF
-	)
-)
-pause
+call :checkSteam
 
 call :checkParameters %1
 set steamapps=%~1\steamapps
@@ -85,7 +72,7 @@ goto :EOF
 			echo Does not contain ACF files. Please make sure to drop the steam library folder. Example: C:\Program Files\Steam\ OR D:\Steam
 			echo The "steamapps" folder will exist within that folder. Press any key to close this window...
 			pause>nul
-			goto :EOF
+			exit
 		)
 	)
 goto :EOF
@@ -98,5 +85,15 @@ goto :EOF
 		echo.
 		echo Press any key to continue, or click the X ^(close button^) on this window to cancel.
 		pause>nul
+	)
+goto :EOF
+
+:checkSteam
+	for /f "usebackq tokens=1" %%x in (`tasklist /fi "imagename eq steam.exe" /nh`) do (
+		if /i "%%x" == "Steam.exe" (
+			echo Steam appears to be running. Please close steam first. Press any key to close this window...
+			pause>nul
+			exit
+		)
 	)
 goto :EOF
