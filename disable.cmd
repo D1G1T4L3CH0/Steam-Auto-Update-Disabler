@@ -5,12 +5,18 @@ setlocal ENABLEDELAYEDEXPANSION
 
 :: check if steam is running. inform user to close first. then exit.
 call :checkSteam
-
+:: make sure parameters were entered. if not, get input.
 call :checkParameters %1
-set steamapps=%~1\steamapps
+:: make sure the steamapps directory looks real. (check for acf files)
+call :checkSteamappsExist
+:: see if the script was run before, if so, warn user
 call :checkPreviousRun
+:: make a temporary directory for the script
 call :createTempDir
 
+cls
+echo Updating Auto update behavior for...
+echo -- -- -- -- Log Started %DATE% @ %TIME% -- -- -- -->>%~dp0\log.txt
 pushd "%steamapps%"
 
 :: Get list of acf files.
@@ -19,6 +25,8 @@ for %%a in (*.acf) do (
 	for /f "tokens=1,2 delims=	" %%x in (%%a) do (
 		if %%x == "AutoUpdateBehavior" if %%y == "0" (
 			:: Create a backup of the file first, then write the file changing the one value.
+			echo %%a
+			echo %%a>>%~dp0\log.txt
 			call :backupFile %%a
 			call :writeChange %%a
 		)
@@ -26,11 +34,17 @@ for %%a in (*.acf) do (
 )
 
 popd
+echo.>>%~dp0\log.txt
+
+echo.
+echo Cleaning up...
 
 :: Clean up temp files.
 del /q "%tempdir%">nul
 rmdir "%tempdir%">nul
 
+echo Done. Press any key to close this window.
+pause>nul
 goto :EOF
 
 
@@ -61,18 +75,18 @@ goto :EOF
 
 :checkParameters
 	if "%~1" == "" (
-		echo Please drop a steam library folder onto this script. Press any key to close this window...
-		pause>nul
-		goto :EOF
+		echo No parameters were passed to the script. You can drop a steam library folder onto this script or enter parameters at the command line.
+		echo.
+		echo You may also just drop the Steam library folder on this window right now. Or you can type it in and press enter.
+		echo.
+		echo Click the X to close this window or don't type anything and press enter to cancel and close this.
+		echo.
+		set /p userInput=Steam Library Path: 
+		echo.
+		if "!userInput!" == "" exit
+		call :setSteamapps !userInput!
 	) else (
-		if not exist "%~1\steamapps\*.acf" (
-			echo The path specified:
-			echo."%~1"
-			echo Does not contain ACF files. Please make sure to drop the steam library folder. Example: C:\Program Files\Steam\ OR D:\Steam
-			echo The "steamapps" folder will exist within that folder. Press any key to close this window...
-			pause>nul
-			exit
-		)
+		call :setSteamapps %1
 	)
 goto :EOF
 
@@ -95,4 +109,18 @@ goto :EOF
 			exit
 		)
 	)
+goto :EOF
+
+:checkSteamappsExist
+	if not exist "%steamapps%\*.acf" (
+		echo "%steamapps%"
+		echo Does not contain ACF files. Please make sure to drop the steam library folder. Example: C:\Program Files\Steam\ OR D:\Steam
+		echo The "steamapps" folder will exist within that folder. Press any key to close this window...
+		pause>nul
+		exit
+	)
+goto :EOF
+
+:setSteamapps
+	set steamapps=%~1\steamapps
 goto :EOF
